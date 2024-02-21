@@ -20,7 +20,7 @@ class BaseModel:
                         onupdate=datetime.datetime.utcnow)
 
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
         if not kwargs:
             from models import storage
