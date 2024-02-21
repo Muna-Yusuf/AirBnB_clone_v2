@@ -29,3 +29,36 @@ class DBstorage:
         )
         if hb_env == "test":
             Base.metadata.drop_all(self.__engine)
+
+    def all(self, cls=None, id=None):
+
+        Class_all = [User, Place, State, City, Amenity, Review]
+        re = {}
+
+        if cls is not None:
+            if id is not None:
+                obj = self.__session.query(cls).get(id)
+                if obj is not None:
+                    ClassName = obj.__class__.__name__
+                    keyName = ClassName + "." + str(obj.id)
+                    result[keyName] = obj
+            else:
+                for obj in self.__session.query(cls).all():
+                    ClassName = obj.__class__.__name__
+                    keyName = ClassName + "." + str(obj.id)
+                    re[keyName] = obj
+
+        else:
+            for clss in Class_all:
+                if id is not None:
+                    obj = self.__session.query(clss).get(id)
+                    if obj is not None:
+                        ClassName = obj.__class__.__name__
+                        keyName = ClassName + "." + str(obj.id)
+                        re[keyName] = obj
+                else:
+                    for obj in self.__session.query(clss).all():
+                        ClassName = obj.__class__.__name__
+                        keyName = ClassName + "." + str(obj.id)
+                        re[keyName] = obj
+        return re
