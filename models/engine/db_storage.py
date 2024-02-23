@@ -1,10 +1,8 @@
 #!/usr/bin/python3
-""" new class for sqlAlchemy """
+"""Module for SQLAlchemy database storage"""
 import os
-from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import Base
 from models.state import State
 from models.city import City
@@ -15,65 +13,64 @@ from models.amenity import Amenity
 
 
 class DBStorage:
-    """ create tables in environmental"""
+    """Database storage engine using SQLAlchemy"""
+
     __engine = None
     __session = None
 
-    def __init__(self):
+    def init(self):
+        """Initialize DBStorage instance"""
         hb_user = os.getenv("HBNB_MYSQL_USER")
         hb_pwd = os.getenv("HBNB_MYSQL_PWD")
         hb_host = os.getenv("HBNB_MYSQL_HOST")
         hb_db = os.getenv("HBNB_MYSQL_DB")
         hb_env = os.getenv("HBNB_ENV")
 
+        # Create MySQL connection string
+        connection_str = f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}"
 
-        engine = create_engine(
-            f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}",
-            pool_pre_ping=True)
+        # Create SQLAlchemy engine
+        engine = create_engine(connection_str, pool_pre_ping=True)
 
         self.__engine = engine
         if hb_env == "test":
             Base.metadata.drop_all(engine)
 
     def all(self, cls=None):
-        """returns a dictionary
-        Return:
-            returns a dictionary of __object
-        """
-        obj_list = [User, Place, State, City, Amenity, Review]
-        objects = []
+        """Query objects from the database"""
+        classes = [State, City, User, Place, Review, Amenity]
+        result = {}
 
-        if cls is not None:
-            objects.extend(self.__session.query(cls).all())
+        if cls:
+            query = self.__session.query(cls).all()
         else:
-            for items in obj_list:
-                objects.extend(self.__session.query(items).all())
-        dic = {}
-        for obj in objects:
-            k = f"{obj.__class__.__name__}.{obj.id}"
-            dic[k] = obj
-        return dic
+            query = []
+            for clazz in classes:
+                query.extend(self.__session.query(clazz).all())
+
+        for obj in query:
+            key = "{}.{}".format(type(obj).name, obj.id)
+            result[key] = obj
+        return result
 
     def new(self, obj):
-        """add a new element in the table
-        """
-        self.__session.add(obj)
+        """Add object to current database session"""
+        if obj:
+            self.__session.add(obj)
 
     def save(self):
-        """save changes
-        """
+        """Commit all changes of the current database session"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """delete an element in the table
-        """
+        """Delete from the current database session obj if not None"""
         if obj:
-            self.session.delete(obj)
+            self.__session.delete(obj)
 
     def reload(self):
-        """configuration
-        """
+        """Create all tables in the database and create session"""
         Base.metadata.create_all(self.__engine)
-        sec = sessionmaker(bind=(self.__engine), expire_on_commit=False)
-        Session = scoped_session(sec)
+        session_factory = sessionmaker(
+                bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(session_factory)
         self.__session = Session()
