@@ -2,15 +2,14 @@
 """ Console Module """
 import cmd
 import sys
-from models.base_model import BaseModel
-from models.__init__ import storage
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-
+from models.base_model import BaseModel
+from models.__init__ import storage
 
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
@@ -23,39 +22,6 @@ class HBNBCommand(cmd.Cmd):
                'State': State, 'City': City, 'Amenity': Amenity,
                'Review': Review
               }
-    valid_keys = {
-        "BaseModel": ["id", "created_at", "updated_at"],
-        "User": [
-            "id",
-            "created_at",
-            "updated_at",
-            "email",
-            "password",
-            "first_name",
-            "last_name",
-        ],
-        "City": ["id", "created_at", "updated_at", "state_id", "name"],
-        "State": ["id", "created_at", "updated_at", "name"],
-        "Place": [
-            "id",
-            "created_at",
-            "updated_at",
-            "city_id",
-            "user_id",
-            "name",
-            "description",
-            "number_rooms",
-            "number_bathrooms",
-            "max_guest",
-            "price_by_night",
-            "latitude",
-            "longitude",
-            "amenity_ids"
-        ],
-        "Amenity": ["id", "created_at", "updated_at", "name"],
-        "Review": ["id", "created_at", "updated_at",
-                   "place_id", "user_id", "text"],
-    }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
              'number_rooms': int, 'number_bathrooms': int,
@@ -98,7 +64,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline.partition(', ')  # pline convert to tuple
 
                 # isolate _id, stripping quotes
-                _id = pline[0].replace('"', '')
+                _id = pline[0].replace('\"', '')
                 # possible bug here:
                 # empty quotes register as empty _id when replaced
 
@@ -106,8 +72,8 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if (pline[0] == '{' and pline[-1] == '}'
-                            and type(eval(pline)) is dict):
+                    if pline[0] == '{' and pline[-1] == '}'\
+                            and type(eval(pline)) is dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -146,48 +112,24 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def parse_value(self, value):
-        """it casts the str to int or float if possible"""
-        is_valid = True
-        if len(value) >= 2 and value[0] == '"'\
-                and value[len(value) - 1] == '"':
-            value = value[1:-1]
-            value = value.replace("_", " ")
-        else:
-            try:
-                if "." in value:
-                    value = float(value)
-                else:
-                    value = int(value)
-            except ValueError:
-                is_valid = False
-        if is_valid:
-            return value
-        else:
-            return None
-
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
+        try:
+            if not args:
+                raise SyntaxError()
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_splited[1] = eval(arg_splited[1])
+                if type(arg_splited[1]) is str:
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
+                kw[arg_splited[0]] = arg_splited[1]
+        except SyntaxError:
             print("** class name missing **")
-            return
-        args_arr = args.split()
-        class_name = args_arr[0]
-        if class_name not in HBNBCommand.classes:
+        except NameError:
             print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[class_name]()
-        for i in range(1, len(args_arr)):
-            arr = args_arr[i].split("=")
-            if (len(arr) == 2):
-                key = arr[0]
-                if key not in HBNBCommand.valid_keys[class_name]:
-                    continue
-                value = self.parse_value(arr[1])
-                if value is not None:
-                    setattr(new_instance, key, value)
-            else:
-                pass
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
         new_instance.save()
         print(new_instance.id)
 
@@ -271,13 +213,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
-        else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 print_list.append(str(v))
-
+        else:
+            for k, v in storage.all().items():
+                print_list.append(str(v))
         print(print_list)
 
     def help_all(self):
