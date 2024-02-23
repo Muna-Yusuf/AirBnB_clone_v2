@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """ new class for sqlAlchemy """
+import os
 from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
@@ -19,42 +20,39 @@ class DBStorage:
     __session = None
 
     def __init__(self):
-        hb_user = getenv("HBNB_MYSQL_USER")
-        hb_pwd = getenv("HBNB_MYSQL_PWD")
-        hb_host = getenv("HBNB_MYSQL_HOST")
-        hb_db = getenv("HBNB_MYSQL_DB")
-        hb_env = getenv("HBNB_ENV")
+        hb_user = os.getenv("HBNB_MYSQL_USER")
+        hb_pwd = os.getenv("HBNB_MYSQL_PWD")
+        hb_host = os.getenv("HBNB_MYSQL_HOST")
+        hb_db = os.getenv("HBNB_MYSQL_DB")
+        hb_env = os.getenv("HBNB_ENV")
 
 
-        self.__engine = create_engine(
+        engine = create_engine(
             f"mysql+mysqldb://{hb_user}:{hb_pwd}@{hb_host}/{hb_db}",
-            pool_pre_ping=True,
-        )
+            pool_pre_ping=True)
 
+        self.__engine = engine
         if hb_env == "test":
-            Base.metadata.drop_all((self.__engine))
+            Base.metadata.drop_all(engine)
 
     def all(self, cls=None):
         """returns a dictionary
         Return:
             returns a dictionary of __object
         """
-        dic = {}
-        if cls:
-            if type(cls) is str:
-                cls = eval(cls)
-            query = self.__session.query(cls)
-            for elem in query:
-                key = "{}.{}".format(type(elem).__name__, elem.id)
-                dic[key] = elem
+        obj_list = [User, Place, State, City, Amenity, Review]
+        objects = []
+
+        if cls is not None:
+            objects.extend(self.__session.query(cls).all())
         else:
-            lista = [State, City, User, Place, Review, Amenity]
-            for clase in lista:
-                query = self.__session.query(clase)
-                for elem in query:
-                    key = "{}.{}".format(type(elem).__name__, elem.id)
-                    dic[key] = elem
-        return (dic)
+            for items in obj_list:
+                objects.extend(self.__session.query(items).all())
+        dic = {}
+        for obj in objects:
+            k = f"{obj.__class__.__name__}.{obj.id}"
+            dic[k] = obj
+        return dic
 
     def new(self, obj):
         """add a new element in the table
@@ -75,13 +73,7 @@ class DBStorage:
     def reload(self):
         """configuration
         """
-        from sqlalchemy import create_engine
         Base.metadata.create_all(self.__engine)
         sec = sessionmaker(bind=(self.__engine), expire_on_commit=False)
         Session = scoped_session(sec)
         self.__session = Session()
-
-    def close(self):
-        """ calls remove()
-        """
-        self.__session.close()

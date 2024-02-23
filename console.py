@@ -114,22 +114,29 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError()
-            arg_list = args.split(" ")
-            kw = {}
-            for arg in arg_list[1:]:
-                arg_splited = arg.split("=")
-                arg_splited[1] = eval(arg_splited[1])
-                if type(arg_splited[1]) is str:
-                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
-                kw[arg_splited[0]] = arg_splited[1]
-        except SyntaxError:
+        if not args:
             print("** class name missing **")
-        except NameError:
+            return
+        args_array = args.split(args)
+        class_name = args_array[0]
+        pairs = args_array[1:]
+
+        if className not in HBNBCommand.classes:
             print("** class doesn't exist **")
-        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+            return
+        new_instance = HBNBCommand.classes[class_name]()
+        for pair in pairs:
+            parts = pair.split("=")
+            attr_name = parts[0]
+            attr_value = parts[1]
+            attr_value = attr_value.replace('"', r'\"')
+            attr_value = attr_value.replace('_', ' ')
+            if '.' in attr_value:
+                attr_value = float(attr_value)
+            elif attr_value.isdigit():
+                attr_value = int(attr_value)
+            else:
+                setattr(new_instance, attr_name, attr_value)
         new_instance.save()
         print(new_instance.id)
 
