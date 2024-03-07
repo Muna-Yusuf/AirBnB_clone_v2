@@ -21,14 +21,14 @@ html_content="<html>
 </html>"
 
 echo "$html_content" | sudo tee /data/web_static/releases/test/index.html > /dev/null
-rm -rf data/web_static/current
+rm -rf /data/web_static/current
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 
 #Give ownership of the /data/ folder to the ubuntu user AND group.
 sudo chown -R ubuntu:ubuntu /data/
 
 #Update the Nginx configuration.
-sudo wget -q -o etc/nginx/sites-available/default http://exampleconfig.com/static/raw/nginx/ubuntu20.04/etc/nginx/sites-available/default
+sudo wget -q -o /etc/nginx/sites-available/default http://exampleconfig.com/static/raw/nginx/ubuntu20.04/etc/nginx/sites-available/default
 config="/etc/nginx/sites-available/default"
 echo "Holberton School Hello Worl" | sudo tee /var/www/html/index.html > /dev/null
 sudo sed -i '/^}$/i \ \n\tlocation \/redirect_me {return 301 https:\/\/www.youtube.com\/watch?v=QH2-TGUlwu4;}' $config
