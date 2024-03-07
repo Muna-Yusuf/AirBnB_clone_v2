@@ -14,8 +14,8 @@ echo "testing Nginx configuration" > /data/web_static/releases/test/index.html
 ln -sf /data/web_static/releases/test/ /data/web_static/current
 
 #Give ownership of the /data/ folder to the ubuntu user AND group.
-chown -R ubuntu /data/
-chgrp -R ubuntu /data/
+chown -R ubuntu:ubuntu /data/
+chgrp -R ubuntu:ubuntu /data/
 
 #Update the Nginx configuration.
 printf %s "server{
