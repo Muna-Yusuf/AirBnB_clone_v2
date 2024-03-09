@@ -4,11 +4,11 @@
     using the function do_pack.
 """
 
-from fabric import *
+from fabric.api import *
 from datetime import datetime
 import os
 
-evn.host = ["54.146.92.3", "54.160.116.131"]
+env.hosts = ["54.146.92.3", "54.160.116.131"]
 
 
 def do_pack():
