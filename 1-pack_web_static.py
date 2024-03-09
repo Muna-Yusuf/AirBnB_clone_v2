@@ -11,6 +11,7 @@ import os
 
 
 def do_pack():
+    """ Prototype: def do_pack()."""
     time_now = datetime.now()
     local("mkdir -p versions")
 
