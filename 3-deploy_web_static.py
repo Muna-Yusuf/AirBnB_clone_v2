@@ -1,8 +1,9 @@
 #!/usr/bin/python3
-""" Fabric script that generates a .tgz archive from the...
-    contents of the web_static folder of your AirBnB Clone repo,
-    using the function do_pack.
+""" Fabric script (based on the file 2-do_deploy_web_static.py)...
+    that creates and distributes an archive to your...
+    web servers, using the function deploy.
 """
+
 
 from fabric.api import *
 from datetime import datetime
@@ -49,3 +50,11 @@ def do_deploy(archive_path):
         return True
     except Exception:
         return False
+
+
+def deploy():
+    """ Prototype: def deploy()."""
+    path = do_deploy()
+    if path is None:
+        return False
+    return do_deploy(path)

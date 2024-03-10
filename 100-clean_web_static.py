@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-""" Fabric script that generates a .tgz archive from the...
-    contents of the web_static folder of your AirBnB Clone repo,
-    using the function do_pack.
+""" Fabric script (based on the file 3-deploy_web_static.py)...
+    that deletes out-of-date archives, using the function do_clean.
 """
+
 
 from fabric.api import *
 from datetime import datetime
@@ -49,3 +49,21 @@ def do_deploy(archive_path):
         return True
     except Exception:
         return False
+
+
+def deploy():
+    """ Prototype: def deploy()."""
+    path = do_deploy()
+    if path is None:
+        return False
+    return do_deploy(path)
+
+
+def do_clean(number=0):
+    """ Prototype: def do_clean(number=0)."""
+    if int(number) == 0:
+        number = 1
+    number = int(number) + 1
+    remove_local(number)
+    path = "/data/web_static/releases/*"
+    run("ls -dt {} | tail -n +{} | sudo xargs rm -fr".format(path, number))
