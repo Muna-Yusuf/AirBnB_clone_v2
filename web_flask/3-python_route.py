@@ -21,5 +21,12 @@ def C_text(text):
     """Script that displays "C" followed by the value of the text variable."""
     return 'C ' + text.replace('_', ' ')
 
+
+@app.route('/python/', defaults={'text': 'is cool'}, strict_slashes=False)
+@app.route("/python/<text>", strict_slashes=False)
+def python_text(text):
+    """Script displays"Python"followed by the value of the text variable."""
+    return 'Python ' + text.replace('_', ' ')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
