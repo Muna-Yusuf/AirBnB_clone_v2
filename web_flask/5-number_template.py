@@ -29,16 +29,16 @@ def python_text(text):
     return 'Python ' + text.replace('_', ' ')
 
 
-@app.route("/number/<n>", strict_slashes=False)
+@app.route('/number/<n>', strict_slashes=False)
 def number(n):
     """Script displays n is a number only if n is an integer."""
-    return str(n) + ' is a number'
+    return "{} is a number".format(n)
 
 
-@app.route("/number_template/<n>", strict_slashes=False)
+@app.route('/number_template/<n>', strict_slashes=False)
 def number_template(n):
     """Script displays display a HTML page only if n is an integer."""
-    path = '5-number.html'
+    path = "5-number.html"
     return render_template(path, n=n)
 
 

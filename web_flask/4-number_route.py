@@ -32,7 +32,7 @@ def python_text(text):
 @app.route("/number/<n>", strict_slashes=False)
 def number(n):
     """Script displays n is a number only if n is an integer."""
-    return str(n) + ' is a number'
+    return '{} is a number'.format(n)
 
 
 if __name__ == '__main__':
