@@ -35,15 +35,10 @@ def number(n):
     return "{:d} is a number".format(n)
 
 
-@app.route('/number_odd_or_even/<int:n>', strict_slashes=False)
-def numbersandevenness(n):
+@app.route('/number_template/<int:n>', strict_slashes=False)
+def numbersandtemplates(n):
     """display a HTML page only if n is an integer"""
-    if n % 2 == 0:
-        evenness = 'even'
-    else:
-        evenness = 'odd'
-    return render_template('6-number_odd_or_even.html', n=n,
-                           evenness=evenness)
+    return render_template('5-number.html', n=n)
 
 
 if __name__ == '__main__':
