@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
+"""class State"""
 import models
 from models.base_model import BaseModel, Base
 from models.city import City
@@ -8,9 +8,8 @@ import sqlalchemy
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
+
 class State(BaseModel, Base):
-    """ State class """
-    class State(BaseModel, Base):
     """Representation of state """
     if models.storage_t == "db":
         __tablename__ = 'states'
